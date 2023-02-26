@@ -297,9 +297,9 @@ for index in range(78):
 
 submission=pd.DataFrame(submission)
 submission2=pd.merge(test[['index','id', 'period']],submission,how='left',on=['index'])
-sampled_indices=test.groupby('id').sample(1)['index']
-# submission3=submission2.groupby(['id', 'row', 'column'])['label'].median().reset_index()
-submission3=submission2.loc[submission2['index'].isin(sampled_indices)].copy()
+# sampled_indices=test.groupby('id').sample(1)['index']
+submission3=submission2.groupby(['id', 'row', 'column'])['label'].median().reset_index()
+# submission3=submission2.loc[submission2['index'].isin(sampled_indices)].copy()
 
 submission3['tile_row_column']=submission3.apply(lambda row:f'Tile{row["id"]:02.0f}_{row["row"]:.0f}_{row["column"]:.0f}',axis=1)
 submission3['label']=submission3['label'].map(lambda x:int(x>=0.5))
