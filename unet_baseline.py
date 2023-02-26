@@ -143,9 +143,9 @@ def train_fun(model,optimizer,criterion,train_loader,val_loader,grad_scaler,sche
             batch_x,batch_y=aug_list(batch_x,batch_y)
         batch_x = batch_x - 0.5 #+ torch.randn(batch_x.size(), device=batch_x.device) * gaus_sd
         logits=model(batch_x)
-        # loss=criterion(logits,batch_y)
-        # loss = loss + dice_loss(logits.sigmoid(),batch_y)
-        loss = dice_loss(logits.sigmoid(), batch_y)
+        loss=criterion(logits,batch_y)
+        loss = loss + dice_loss(logits.sigmoid(),batch_y)
+        # loss = dice_loss(logits.sigmoid(), batch_y)
         optimizer.zero_grad()
         # grad_scaler.scale(loss).backward()
         loss.backward()
@@ -169,9 +169,9 @@ def train_fun(model,optimizer,criterion,train_loader,val_loader,grad_scaler,sche
             batch_x=batch_x - 0.5
             logits = model(batch_x)
 
-            # loss = criterion(logits, batch_y)
-            # loss = loss + dice_loss(logits.sigmoid(),batch_y)
-            loss = dice_loss(logits.sigmoid(), batch_y)
+            loss = criterion(logits, batch_y)
+            loss = loss + dice_loss(logits.sigmoid(),batch_y)
+            # loss = dice_loss(logits.sigmoid(), batch_y)
             val_loss += loss.item() / len(val_loader)
             pred_val.append(logits.sigmoid().squeeze().cpu().numpy().reshape(-1))
             obs_val.append(batch_y.squeeze().cpu().numpy().reshape(-1))
@@ -210,7 +210,7 @@ class Trainer(tune.Trainable):
         self.model.load_state_dict(model_state)
         self.optimizer.load_state_dict(optimizer_state)
 
-epochs=350
+epochs=300
 scheduler = ASHAScheduler(
         metric="f1",
         mode="max",
@@ -293,7 +293,7 @@ submission=[]
 for index in range(78):
     for row in range(256):
         for col in range(256):
-            submission.append({"index":index,'row':row,'column':col,'label':pred_test[index][row][col]})
+            submission.append({"index":index,'row':row,'column':col,'label':pred_test[index][col][row]})
 
 submission=pd.DataFrame(submission)
 submission2=pd.merge(test[['index','id', 'period']],submission,how='left',on=['index'])
